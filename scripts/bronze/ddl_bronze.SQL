@@ -7,103 +7,64 @@ Script purpose:
   Run this script to redefine DDL structure of Bronze tables.
 ==================================================
 /*
-CREATE or ALTER PROCEDURE bronze.load_bronze AS
-BEGIN
-    DECLARE @start_time, @end_time
-	BEGIN TRY
-		PRINT '================================';
-		PRINT 'Loading bronze layer';
-		PRINT '================================';
+IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_cust_info;
+CREATE TABLE bronze.crm_cust_info(
+	cst_id INT,
+	cst_key NVARCHAR(50),
+	cst_firstname NVARCHAR(50),
+	cst_marital_status NVARCHAR(50),
+	cst_gndr NVARCHAR(50),
+	cst_create_date NVARCHAR(50)
+);
 
-		PRINT '--------------------------------';
-		Print 'Loading CRM tables';
-		PRINT '--------------------------------';
+IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_prd_info;
+CREATE TABLE bronze.crm_prd_info(
+	prd_id INT,
+	prd_key NVARCHAR(50),
+	prd_nm NVARCHAR(50),
+	prd_cost int,
+	prd_line nvarchar(50),
+	prd_start_dt datetime,
+	prd_end_dt datetime
+);
 
-		SET @start_time = GETDATE();
-		PRINT '>>> Truncating Table: bronze.crm_cust_info'
-		TRUNCATE TABLE bronze.crm_cust_info;
+IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
+    DROP TABLE bronze.crm_sales_details;
+CREATE TABLE bronze.crm_sales_details(
+	sls_ord_num NVARCHAR(50),
+	sls_prd_key NVARCHAR(50),
+	sls_cust_id INT,
+	sls_order_dt INT,
+	sls_ship_dt INT,
+	sls_due_dt INT,
+	sls_sales INT,
+	sls_quantity INT,
+	sls_price INT
+);
 
-		PRINT '>>> Inserting data into: bronze.crm_cust_info'
-		BULK INSERT bronze.crm_cust_info
-		FROM 'C:\Users\nikhi\OneDrive\Desktop\Dataset-BARA\cust_info.csv'
-		WITH (
-		   firstrow = 2,
-		   fieldterminator = ',',
-		   TABLOCK
-		);
-		SET @end_time = GETDATE()
-		PRINT'>> LOAD Duration:' + CAST(datediff(second,@start_time,@end_time) as NVARCHAR) + 'seconds';
-		PRINT'---------------------';
+IF OBJECT_ID('bronze.erp_LOC_A101', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_LOC_A101;
+CREATE TABLE bronze.erp_LOC_A101(
+	cid nvarchar(50),
+	cntry nvarchar(50)
+);
 
-	
-		PRINT '>>> Truncating Table: bronze.crm_prd_info'
-		TRUNCATE TABLE bronze.crm_prd_info;
+IF OBJECT_ID('bronze.erp_CUST_AZ12', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_CUST_AZ12;
+CREATE TABLE bronze.erp_CUST_AZ12(
+	cid nvarchar(50),
+	bdate Date,
+	gen nvarchar(50)
+);
 
-		PRINT '>>> Inserting data into: bronze.crm_prd_info'
-		BULK INSERT bronze.crm_prd_info
-		FROM 'C:\Users\nikhi\OneDrive\Desktop\Dataset-BARA\prd_info.csv'
-		WITH (
-		   firstrow = 2,
-		   fieldterminator = ',',
-		   TABLOCK
-		);
+IF OBJECT_ID('bronze.erp_PX_CAT_G1V2', 'U') IS NOT NULL
+    DROP TABLE bronze.erp_PX_CAT_G1V2;
+CREATE TABLE bronze.erp_PX_CAT_G1V2 (
+	id nvarchar(50),
+	cat nvarchar(50),
+	subcat nvarchar(50),
+	maintenance nvarchar(50)
+);
 
-		PRINT '>>> Truncating Table: bronze.crm_sales_details'
-		TRUNCATE TABLE bronze.crm_sales_details;
-
-		PRINT '>>> Inserting data into: bronze.crm_sales_details'
-		BULK INSERT bronze.crm_sales_details
-		FROM 'C:\Users\nikhi\OneDrive\Desktop\Dataset-BARA\sales_details.csv'
-		WITH (
-		   firstrow = 2,
-		   fieldterminator = ',',
-		   TABLOCK
-		);
-
-	
-		PRINT '--------------------------------';
-		Print 'Loading ERP tables';
-		PRINT '--------------------------------';
-
-		PRINT '>>> Truncating Table: bronze.erp_CUST_AZ12'
-		TRUNCATE TABLE bronze.erp_CUST_AZ12;
-		PRINT '>>> Inserting data into: bronze.erp_CUST_AZ12'
-		BULK INSERT bronze.erp_CUST_AZ12
-		FROM 'C:\Users\nikhi\OneDrive\Desktop\Dataset-BARA\CUST_AZ12.csv'
-		WITH (
-		   firstrow = 2,
-		   fieldterminator = ',',
-		   TABLOCK
-		);
-
-		PRINT '>>> Truncating Table: bronze.erp_LOC_A10'
-		TRUNCATE TABLE bronze.erp_LOC_A101;
-		PRINT '>>> Inserting data into: bronze.erp_LOC_A101'
-		BULK INSERT bronze.erp_LOC_A101
-		FROM 'C:\Users\nikhi\OneDrive\Desktop\Dataset-BARA\LOC_A101.csv'
-		WITH (
-		   firstrow = 2,
-		   fieldterminator = ',',
-		   TABLOCK
-		);
-
-		PRINT '>>> Truncating Table: bronze.erp_PX_CAT_G1V2'
-		TRUNCATE TABLE bronze.erp_PX_CAT_G1V2;
-		PRINT '>>> Inserting data into: bronze.erp_PX_CAT_G1V2'
-		BULK INSERT bronze.erp_PX_CAT_G1V2
-		FROM 'C:\Users\nikhi\OneDrive\Desktop\Dataset-BARA\PX_CAT_G1V2.csv'
-		WITH (
-		   firstrow = 2,
-		   fieldterminator = ',',
-		   TABLOCK
-		);
-	END TRY
-	BEGIN CATCH
-		PRINT '======================================================='
-		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER'
-		PRINT 'Error Message' + ERROR_MESSAGE();
-		PRINT 'Error Message' + CAST(ERROR_NUMBER() AS NVARCHAR);
-		PRINT 'Error Message' + CAST(ERROR_state() AS NVARCHAR);
-		PRINT '======================================================='
-	END CATCH
-END;
