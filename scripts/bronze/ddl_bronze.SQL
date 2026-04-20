@@ -66,5 +66,5 @@ CREATE TABLE bronze.erp_PX_CAT_G1V2 (
 	cat nvarchar(50),
 	subcat nvarchar(50),
 	maintenance nvarchar(50)
-);
+); 
 
